@@ -1,0 +1,7 @@
+faster-whisper==1.2.1
+argostranslate==1.11.0
+pyaudiowpatch==0.2.12.9
+silero-vad==6.2.3
+numpy==2.5.5
+speechbrain==1.1.2
+torchaudio==2.11.1
