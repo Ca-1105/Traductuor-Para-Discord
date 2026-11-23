@@ -42,7 +42,10 @@ Controles de la ventana:
 - **Pausar / Reanudar:** detiene el procesamiento temporalmente.
 - **Limpiar:** borra el historial de subtítulos.
 - **Reiniciar voces:** vuelve a numerar los speakers desde 1.
-- **Siempre arriba:** mantiene la ventana por encima de Discord.
+- **Barra superior:** arrastra el encabezado para mover la ventana; `−` la minimiza (se recupera desde la barra de tareas) y `×` la cierra (no hay barra del sistema).
+- **Siempre arriba:** la ventana se mantiene por encima de Discord automáticamente (no tiene botón; se reaplica solo).
+- **Transparente / Opacidad:** hace translúcido solo el fondo; las letras siguen opacas. Usa el deslizador (0–100%) para ajustar cualquier nivel intermedio; también responde a las flechas del teclado cuando tiene el foco.
+- **Centrar arriba:** devuelve la ventana al centro de la parte superior (está junto a los demás botones en la fila de controles).
 
 ### Opciones de línea de comandos
 ```
@@ -59,11 +62,14 @@ Edita `config.py`:
   speakers; súbelo (0.8) si personas distintas salen como una sola.
 - `WHISPER_MODEL = "base"` — cambia a `tiny` para más velocidad o `small` para
   más precisión.
-- `SILENCE_FRAMES` — controla cuánta pausa se necesita para cerrar una frase.
+- `SILENCE_FRAMES` — controla cuánta pausa se necesita para cerrar una frase (16 = ~0,5 s).
+- `MAX_UTTERANCE_SECONDS` — duración máxima de una frase antes de procesarla (12 s por defecto); bájalo para responder antes.
+- `SPEAKER_EMBED_SECONDS` — segundos de audio usados para identificar al hablante (3 s).
+- Los modelos se cargan en segundo plano al abrir la ventana y se calientan antes de la primera traducción.
 
 ---
 
-## English
+## English para Nash
 
 ### Requirements
 - Windows 10/11.
@@ -96,7 +102,10 @@ Window controls:
 - **Pausar / Reanudar (Pause / Resume):** temporarily stops processing.
 - **Limpiar (Clear):** clears the subtitle history.
 - **Reiniciar voces (Reset voices):** renumbers speakers from 1.
-- **Siempre arriba (Always on top):** keeps the window above Discord.
+- **Barra superior (Title bar):** drag the header to move the window; `−` minimizes it (restore from the taskbar) and `×` closes it (there is no system title bar).
+- **Siempre arriba (Always on top):** the window stays above Discord automatically (no button; reapplied on its own).
+- **Transparente / Opacidad (Transparency / Opacity):** makes only the background translucent; text stays opaque. Use the slider (0–100%) for any intermediate level; arrow keys also work when it has focus.
+- **Centrar arriba (Center at top):** moves the window back to the top center (it sits with the other buttons in the controls row).
 
 ### Command line options
 ```
@@ -112,4 +121,7 @@ Edit `config.py`:
 - `SPEAKER_THRESHOLD = 0.7` — lower it (0.6) if one person is split into several
   speakers; raise it (0.8) if different people are merged into one.
 - `WHISPER_MODEL = "base"` — use `tiny` for speed or `small` for accuracy.
-- `SILENCE_FRAMES` — controls how much silence ends an utterance.
+- `SILENCE_FRAMES` — controls how much silence ends an utterance (16 = ~0.5 s).
+- `MAX_UTTERANCE_SECONDS` — maximum utterance length before processing (12 s by default); lower it for faster responses.
+- `SPEAKER_EMBED_SECONDS` — seconds of audio used to identify the speaker (3 s).
+- Models load in the background when the window opens and are warmed up before the first translation.

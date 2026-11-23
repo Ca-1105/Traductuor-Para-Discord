@@ -6,9 +6,11 @@ Real-time subtitles for what you hear in Discord (or any call), English ↔ Span
 
 ## Características / Features
 
-- Transcripción local con [faster-whisper](https://github.com/SYSTRAN/faster-whisper) y traducción con Argos Translate (sin APIs de pago).
+- Transcripción local con [faster-whisper](https://github.com/SYSTRAN/faster-whisper) y traducción con Argos Translate (sin APIs de pago). El idioma se detecta automáticamente en cada frase (inglés o español) y se traduce al otro; se descartan repeticiones alucinadas como "mainstream mainstream...".
 - Identificación de hablantes con SpeechBrain ECAPA.
-- Ventana siempre arriba con la traducción, el texto original y la etiqueta del hablante.
+- Ventana siempre arriba, sin barra del sistema (fondo oscuro continuo), centrada en la parte superior, con la traducción, el texto original y la etiqueta del hablante. Se arrastra desde el encabezado; `−` la minimiza (se recupera desde la barra de tareas) y `×` la cierra.
+- Control de transparencia: casilla "Transparente" y deslizador de opacidad (0%–100%). Solo afecta al fondo; el texto se mantiene nítido y opaco. "Centrar arriba" está junto al resto de botones de la fila de controles.
+- Interfaz oscura rediseñada con tarjetas, colores por hablante e indicador de estado.
 - Modos: español, inglés o detección automática del idioma entrante.
 
 ## Requisitos / Requirements
@@ -30,7 +32,7 @@ El primer comando crea `.venv`, instala `requirements.txt` y descarga los modelo
 
 1. Entra a un canal de voz en Discord.
 2. Comprueba que el audio salga por el dispositivo capturado (por defecto, el altavoz de Windows).
-3. Usa los botones de la ventana para traducir a Español / English / Auto, pausar, limpiar el historial, reiniciar voces o activar "siempre arriba".
+3. Usa los botones de la ventana para traducir a Español / English / Auto, pausar, limpiar el historial, reiniciar voces, hacerla transparente con "Transparente" / "Opacidad" o volver a centrarla arriba con "Centrar arriba" (todos juntos en la fila de controles). `−` minimiza y `×` cierra. La ventana se mantiene siempre arriba automáticamente, sin botón.
 
 Opciones / CLI options:
 
@@ -44,6 +46,6 @@ Si no aparecen subtítulos, ejecuta `--list-devices` y selecciona la salida corr
 
 ## Configuración / Configuration
 
-Edita `config.py` para ajustar `SPEAKER_THRESHOLD` (separación de hablantes), `WHISPER_MODEL` (`tiny` = más rápido, `small` = más preciso) y `SILENCE_FRAMES` (pausa que cierra una frase).
+Edita `config.py` para ajustar `SPEAKER_THRESHOLD` (separación de hablantes), `WHISPER_MODEL` (`tiny` = más rápido, `small` = más preciso), `SILENCE_FRAMES` / `MAX_UTTERANCE_SECONDS` (latencia de las frases), `SPEAKER_EMBED_SECONDS` y los valores de ventana (`WINDOW_WIDTH`, `WINDOW_HEIGHT`, `WINDOW_TOP_MARGIN`, `DEFAULT_OPACITY`, `TRANSPARENT_OPACITY`, `MIN_OPACITY`). Los modelos se cargan en segundo plano al abrir la ventana para que no haya que esperar antes de verla.
 
 Guía detallada en ambos idiomas: [INSTRUCTIONS.md](INSTRUCTIONS.md).

@@ -1,13 +1,37 @@
 from __future__ import annotations
 
+import re
+from collections import Counter
+
 import numpy as np
 import argostranslate.package as argos_package
+import argostranslate.settings as argos_settings
 import argostranslate.translate as argos_translate
 from faster_whisper import WhisperModel
 
 import config
 
+argos_settings.compute_type = "float32"
+
 PAIRS = (("es", "en"), ("en", "es"))
+
+
+def other_language(language):
+    return "en" if language == "es" else "es"
+
+
+def is_bad_transcription(text):
+    compact = re.sub(r"\s+", "", text.lower())
+    if len(compact) > 1000:
+        return True
+    if len(compact) >= 18 and re.search(r"(.{2,12}?)\1{5,}", compact):
+        return True
+    words = re.findall(r"\w+", compact)
+    if len(words) >= 8:
+        _, times = Counter(words).most_common(1)[0]
+        if times >= 8 and times > len(words) * 0.4:
+            return True
+    return False
 
 
 class Translator:
@@ -46,29 +70,41 @@ class Translator:
             self._cache[key] = argos_translate.translate(text, source, target)
         return self._cache[key]
 
-    def process(self, audio: np.ndarray, source_hint):
-        kwargs = dict(
-            beam_size=1,
-            condition_on_previous_text=False,
-            vad_filter=False,
-        )
-        if source_hint == "auto":
-            segments, info = self.whisper.transcribe(audio, **kwargs)
-            detected = info.language
-        else:
-            segments, info = self.whisper.transcribe(audio, language=source_hint, **kwargs)
-            detected = source_hint
+    def warmup(self):
+        argos_settings.compute_type = "float32"
+        self.translate("Hola, ¿cómo estás?", "es", "en")
+        argos_settings.compute_type = "int8"
+        self.translate("Hello, how are you?", "en", "es")
+        argos_settings.compute_type = "float32"
+        self.process(np.zeros(config.SAMPLE_RATE, dtype=np.float32), "es")
 
+    def process(self, audio: np.ndarray, target_hint):
+        segments, info = self.whisper.transcribe(
+            audio,
+            beam_size=5,
+            condition_on_previous_text=False,
+            vad_filter=True,
+            no_repeat_ngram_size=5,
+            repetition_penalty=1.2,
+            log_prob_threshold=-1.0,
+        )
+        detected = info.language
         if detected not in ("es", "en"):
             return None
 
         original = " ".join(
-            segment.text.strip() for segment in segments if segment.avg_logprob > -0.85
+            segment.text.strip()
+            for segment in segments
+            if segment.avg_logprob > -0.85 and segment.no_speech_prob < 0.6
         ).strip()
-        if not original:
+        if not original or is_bad_transcription(original):
             return None
 
-        target = "en" if detected == "es" else "es"
+        if target_hint in ("es", "en") and detected != target_hint:
+            target = target_hint
+        else:
+            target = other_language(detected)
+
         return {
             "source": detected,
             "target": target,

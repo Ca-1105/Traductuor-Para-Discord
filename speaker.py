@@ -24,7 +24,9 @@ class SpeakerDiarizer:
         return len(self._centroids)
 
     def identify(self, audio):
-        samples = np.asarray(audio, dtype=np.float32)
+        samples = np.asarray(audio, dtype=np.float32)[
+            : config.SPEAKER_EMBED_SECONDS * config.SAMPLE_RATE
+        ]
         if samples.size < config.MIN_SPEAKER_SAMPLES:
             return self._last_speaker
 
@@ -44,7 +46,7 @@ class SpeakerDiarizer:
         similarities = np.array([float(np.dot(embedding, centroid)) for centroid in self._centroids])
         best = int(np.argmax(similarities))
 
-        if similarities[best] >= config.SPEAKER_THRESHOLD:
+        if similarities[best] >= config.SPEAKER_THRESHOLD or len(self._centroids) >= config.MAX_SPEAKERS:
             weight = self._counts[best]
             updated = (self._centroids[best] * weight + embedding) / (weight + 1)
             self._centroids[best] = updated / np.linalg.norm(updated)
