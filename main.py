@@ -68,6 +68,9 @@ def main():
                     continue
                 if state.paused:
                     continue
+                # Guard: ensure startup() completed successfully before using services
+                if not all(k in services for k in ("translator", "diarizer", "speaker")):
+                    continue
                 diarizer = services["diarizer"]
                 if state.reset_speakers:
                     diarizer.reset()

@@ -171,7 +171,7 @@ def _find_loopback(name):
             output["name"],
             output["index"],
             int(output["defaultSampleRate"]),
-            int(output["maxInputChannels"]),
+            int(output["maxInputChannels"]) or 2,
         )
     finally:
         audio.terminate()

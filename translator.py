@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from collections import Counter
+from functools import lru_cache
 
 import numpy as np
 import argostranslate.package as argos_package
@@ -13,7 +14,13 @@ import config
 
 argos_settings.compute_type = "float32"
 
-PAIRS = (("es", "en"), ("en", "es"))
+SOURCE_LANGUAGES = config.TARGET_LANGUAGES
+PAIRS = tuple(
+    pair
+    for code in config.TARGET_LANGUAGES
+    for pair in ((code, "en"), ("en", code))
+    if pair[0] != pair[1]
+)
 
 
 def other_language(language):
@@ -42,7 +49,7 @@ class Translator:
             device=config.WHISPER_DEVICE,
             compute_type=config.WHISPER_COMPUTE_TYPE,
         )
-        self._cache = {}
+        # _translate_cached uses lru_cache — no manual cache needed
 
     @staticmethod
     def _has_packages():
@@ -65,18 +72,30 @@ class Translator:
                 argos_package.install_from_path(package.download())
 
     def translate(self, text, source, target):
-        key = (text, source, target)
-        if key not in self._cache:
-            self._cache[key] = argos_translate.translate(text, source, target)
-        return self._cache[key]
+        if source == target:
+            return text
+        return self._translate_cached(text, source, target)
+
+    @lru_cache(maxsize=512)
+    def _translate_cached(self, text, source, target):
+        if argos_translate.get_translation_from_codes(source, target) is not None:
+            return argos_translate.translate(text, source, target)
+        if source == "en" or target == "en":
+            return argos_translate.translate(text, source, target)
+        pivot = argos_translate.translate(text, source, "en")
+        return argos_translate.translate(pivot, "en", target)
 
     def warmup(self):
-        argos_settings.compute_type = "float32"
-        self.translate("Hola, ¿cómo estás?", "es", "en")
-        argos_settings.compute_type = "int8"
-        self.translate("Hello, how are you?", "en", "es")
-        argos_settings.compute_type = "float32"
-        self.process(np.zeros(config.SAMPLE_RATE, dtype=np.float32), "es")
+        original_compute_type = argos_settings.compute_type
+        try:
+            argos_settings.compute_type = "float32"
+            self.translate("Hola, ¿cómo estás?", "es", "en")
+            argos_settings.compute_type = "int8"
+            self.translate("Hello, how are you?", "en", "es")
+            argos_settings.compute_type = "float32"
+            self.process(np.zeros(config.SAMPLE_RATE, dtype=np.float32), "es")
+        finally:
+            argos_settings.compute_type = original_compute_type
 
     def process(self, audio: np.ndarray, target_hint):
         segments, info = self.whisper.transcribe(
@@ -89,7 +108,7 @@ class Translator:
             log_prob_threshold=-1.0,
         )
         detected = info.language
-        if detected not in ("es", "en"):
+        if detected not in SOURCE_LANGUAGES:
             return None
 
         original = " ".join(
@@ -100,10 +119,14 @@ class Translator:
         if not original or is_bad_transcription(original):
             return None
 
-        if target_hint in ("es", "en") and detected != target_hint:
-            target = target_hint
-        else:
+        if target_hint == "auto":
+            if detected not in ("es", "en"):
+                return None
             target = other_language(detected)
+        elif target_hint not in config.TARGET_LANGUAGES or detected == target_hint:
+            return None
+        else:
+            target = target_hint
 
         return {
             "source": detected,

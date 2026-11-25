@@ -6,18 +6,18 @@ Real-time subtitles for what you hear in Discord (or any call), English ↔ Span
 
 ## Características / Features
 
-- Transcripción local con [faster-whisper](https://github.com/SYSTRAN/faster-whisper) y traducción con Argos Translate (sin APIs de pago). El idioma se detecta automáticamente en cada frase (inglés o español) y se traduce al otro; se descartan repeticiones alucinadas como "mainstream mainstream...".
+- Transcripción local con [faster-whisper](https://github.com/SYSTRAN/faster-whisper) y traducción con Argos Translate (sin APIs de pago). Detecta el idioma entrante y traduce al destino elegido: español, inglés, francés, portugués, ruso, italiano, chino (Taiwán) o alemán; se descartan repeticiones alucinadas como "mainstream mainstream...".
 - Identificación de hablantes con SpeechBrain ECAPA.
-- Ventana siempre arriba, sin barra del sistema (fondo oscuro continuo), centrada en la parte superior, con la traducción, el texto original y la etiqueta del hablante. Se arrastra desde el encabezado; `−` la minimiza (se recupera desde la barra de tareas) y `×` la cierra.
-- Control de transparencia: casilla "Transparente" y deslizador de opacidad (0%–100%). Solo afecta al fondo; el texto se mantiene nítido y opaco. "Centrar arriba" está junto al resto de botones de la fila de controles.
+- Ventana siempre arriba, sin barra del sistema (fondo oscuro continuo), centrada en la parte superior, con la traducción, el texto original y la etiqueta del hablante. Se arrastra desde el encabezado y se redimensiona desde los bordes; `⊡` alterna modo compacto, `−` la minimiza (se recupera desde la barra de tareas) y `×` la cierra.
+- Control de transparencia: casilla "Transparente" y deslizador de opacidad (10%–100%). Solo afecta al fondo; el texto se mantiene nítido y opaco. "⌖ Centrar" está junto al resto de botones de la fila de controles.
 - Interfaz oscura rediseñada con tarjetas, colores por hablante e indicador de estado.
-- Modos: español, inglés o detección automática del idioma entrante.
+- Modos destino: español, inglés, francés, portugués, ruso, italiano, chino (Taiwán) y alemán. Auto mantiene la detección inglés ↔ español como antes.
 
 ## Requisitos / Requirements
 
 - Windows 10/11.
 - Python 3.12 con **"Add python.exe to PATH"** marcado en la instalación.
-- Conexión a internet la primera vez (dependencias y modelos, ~500 MB).
+- Conexión a internet la primera vez (dependencias y modelos; los idiomas nuevos descargan paquetes adicionales).
 
 ## Instalación / Installation
 
@@ -32,7 +32,7 @@ El primer comando crea `.venv`, instala `requirements.txt` y descarga los modelo
 
 1. Entra a un canal de voz en Discord.
 2. Comprueba que el audio salga por el dispositivo capturado (por defecto, el altavoz de Windows).
-3. Usa los botones de la ventana para traducir a Español / English / Auto, pausar, limpiar el historial, reiniciar voces, hacerla transparente con "Transparente" / "Opacidad" o volver a centrarla arriba con "Centrar arriba" (todos juntos en la fila de controles). `−` minimiza y `×` cierra. La ventana se mantiene siempre arriba automáticamente, sin botón.
+3. Usa los botones de la ventana para elegir destino (Español / English / Francés / Portugués / Ruso / Italiano / Taiwanés / Alemán / Auto), pausar (⏸/▶), limpiar (🗑), reiniciar voces (↺), centrar (⌖), ajustar "Transparente" / "Opacidad" o alternar modo compacto con `⊡`; redimensiona desde los bordes. `−` minimiza y `×` cierra. La ventana se mantiene siempre arriba automáticamente.
 
 Opciones / CLI options:
 
